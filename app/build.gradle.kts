@@ -30,12 +30,19 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+
+
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -86,4 +93,6 @@ dependencies {
 
     // --- Location: current location weather ---
     implementation(libs.play.services.location)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }

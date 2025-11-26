@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Selected state: glowing circular highlight -->
+    <item android:state_checked="true">
+        <shape android:shape="oval">
+            <size android:width="42dp" android:height="42dp"/>
+
+            <gradient
+                android:startColor="@color/aether_purple_start"
+                android:endColor="@color/aether_blue_end"
+                android:angle="45"/>
+
+            <stroke
+                android:width="2dp"
+                android:color="@color/aether_sky_glow"/>
+
+            <padding
+                android:left="6dp"
+                android:right="6dp"
+                android:top="6dp"
+                android:bottom="6dp"/>
+        </shape>
+    </item>
+
+    <!-- Normal state: transparent -->
+    <item android:drawable="@android:color/transparent"/>
+
+</selector>

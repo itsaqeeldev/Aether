@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="72dp"
+    android:viewportWidth="400"
+    android:viewportHeight="72">
+
+    <!-- BASE CAPSULE GRADIENT (purple → neutral → blue) -->
+    <path
+        android:pathData="M36,0 H364
+                           A36,36 0 0 1 400,36
+                           A36,36 0 0 1 364,72
+                           H36
+                           A36,36 0 0 1 0,36
+                           A36,36 0 0 1 36,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:startColor="#263F29F8"
+                android:centerColor="#14162233"
+                android:endColor="#263B82F6" />
+        </aapt:attr>
+    </path>
+
+    <!-- FROST BASE HAZE (uniform soft white) -->
+    <path
+        android:pathData="M36,0 H364
+                           A36,36 0 0 1 400,36
+                           A36,36 0 0 1 364,72
+                           H36
+                           A36,36 0 0 1 0,36
+                           A36,36 0 0 1 36,0 Z"
+        android:fillColor="#12FFFFFF" />
+
+    <!-- FROST SHINE (diagonal highlight, top-left → center) -->
+    <path
+        android:pathData="M36,0 H364
+                           A36,36 0 0 1 400,36
+                           A36,36 0 0 1 364,72
+                           H36
+                           A36,36 0 0 1 0,36
+                           A36,36 0 0 1 36,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:angle="315"
+            android:startColor="#26FFFFFF"
+            android:centerColor="#08FFFFFF"
+            android:endColor="#00FFFFFF" />
+        </aapt:attr>
+    </path>
+
+</vector>

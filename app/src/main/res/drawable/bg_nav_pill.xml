@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1. Left glow capsule -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="260dp"
+                android:centerX="0.0"
+                android:centerY="0.5"
+                android:startColor="#403C2AF8"
+                android:endColor="#003C2AF8" />
+        </shape>
+    </item>
+
+    <!-- 2. Right glow capsule -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="260dp"
+                android:centerX="1.0"
+                android:centerY="0.5"
+                android:startColor="#303B7CFA"
+                android:endColor="#003B7CFA" />
+        </shape>
+    </item>
+
+    <!-- 3. Base neutral capsule -->
+    <item android:left="1dp" android:right="1dp" android:top="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <gradient
+                android:startColor="#191C27"
+                android:centerColor="#1F2330"
+                android:endColor="#242C3C"
+                android:angle="0" />
+        </shape>
+    </item>
+
+    <!-- 4. Frost capsule -->
+    <item android:left="2dp" android:right="2dp" android:top="2dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <solid android:color="#10FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- 5. Capsule rim -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <stroke android:width="1dp" android:color="#2040A0FF"/>
+        </shape>
+    </item>
+
+</layer-list>

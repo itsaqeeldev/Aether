@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Active icon -->
+    <item android:state_checked="true" android:color="@color/aether_soft_lavender"/>
+
+    <!-- Inactive icon -->
+    <item android:color="@color/aether_text_tertiary"/>
+
+</selector>

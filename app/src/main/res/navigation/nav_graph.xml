@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment2">
+
+    <fragment
+        android:id="@+id/homeFragment2"
+        android:name="com.devsphere.aether.ui.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/locationsFragment2"
+        android:name="com.devsphere.aether.ui.LocationsFragment"
+        android:label="fragment_locations"
+        tools:layout="@layout/fragment_locations" />
+    <fragment
+        android:id="@+id/profileFragment2"
+        android:name="com.devsphere.aether.ui.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/whatToWearFragment2"
+        android:name="com.devsphere.aether.ui.WhatToWearFragment"
+        android:label="fragment_what_to_wear"
+        tools:layout="@layout/fragment_what_to_wear" />
+</navigation>

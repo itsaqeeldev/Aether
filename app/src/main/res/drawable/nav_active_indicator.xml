@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Size of the circle (tweak depending on your icon size) -->
+    <size
+        android:width="42dp"
+        android:height="42dp" />
+
+    <!-- Solid background for the active circle -->
+    <solid android:color="@color/aether_sky_glow" />
+
+</shape>

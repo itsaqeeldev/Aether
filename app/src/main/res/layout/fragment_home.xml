@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/aether_bg_dark"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- ================================
+             HERO IMAGE + OVERLAY GRADIENT
+        ==================================-->
+        <FrameLayout
+            android:id="@+id/hero_container"
+            android:layout_width="0dp"
+            android:layout_height="320dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/imgHero"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/gradient_fire"
+                android:scaleType="centerCrop" />
+
+            <!-- Dark gradient overlay -->
+            <View
+                android:id="@+id/viewHeroOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/hero_gradient_overlay" />
+
+            <!-- Top bar -->
+            <LinearLayout
+                android:id="@+id/topBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="40dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:id="@+id/locationContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/icLocation"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_location"
+                        android:tint="@color/aether_purple_start" />
+
+                    <TextView
+                        android:id="@+id/txtLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="San Francisco"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/actionsContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btnNotifications"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="10dp"
+                        android:background="@drawable/neo_circle"
+                        android:src="@drawable/ic_bell"
+                        android:tint="@color/nav_icon_selector"/>
+
+                    <ImageView
+                        android:id="@+id/btnAddLocation"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:padding="10dp"
+                        android:tint="@color/white"
+                        android:background="@drawable/gradient_primary_round"
+                        android:src="@drawable/ic_plus" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Temperature Text -->
+            <LinearLayout
+                android:id="@+id/tempContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:layout_gravity="bottom"
+                android:paddingBottom="24dp">
+
+                <LinearLayout
+                    android:id="@+id/tempRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txtTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="24"
+                        android:textSize="110sp"
+                        android:textColor="@color/aether_text_primary"
+                        android:fontFamily="sans-serif-black" />
+
+                    <TextView
+                        android:id="@+id/txtTempUnit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="°C"
+                        android:textSize="40sp"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/aether_text_secondary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtCondition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Partly Cloudy"
+                    android:textSize="18sp"
+                    android:textColor="@color/aether_text_secondary" />
+
+                <TextView
+                    android:id="@+id/txtHighLow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="H:28°  L:18°"
+                    android:textSize="14sp"
+                    android:textColor="@color/aether_text_tertiary" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- ===============================
+               SMART CARD — MOOD
+        =================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMood"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="26dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/hero_container"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Original layout inside (unchanged) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <FrameLayout
+                    android:id="@+id/iconContainerMood"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/gradient_mood"
+                    android:padding="12dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icMood"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_smile"
+                        android:tint="@color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/txtMoodTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Mood: Energetic"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-medium"
+                    app:layout_constraintStart_toEndOf="@id/iconContainerMood"
+                    app:layout_constraintTop_toTopOf="@id/iconContainerMood"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtMoodSub"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="16dp"
+                    android:text="Based on humidity, temperature, wind, and AQI."
+                    android:textColor="@color/aether_text_secondary"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/iconContainerMood"
+                    app:layout_constraintTop_toBottomOf="@id/txtMoodTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- ===============================
+               SMART CARD — RAIN FORECAST
+        =================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRain"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="26dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardMood"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <FrameLayout
+                    android:id="@+id/iconRain"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/gradient_ocean"
+                    android:padding="12dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icRain"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_rain"
+                        android:tint="@color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/txtRainTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Rain expected in 42 minutes"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toEndOf="@id/iconRain"
+                    app:layout_constraintTop_toTopOf="@id/iconRain"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <View
+                    android:id="@+id/progressBg"
+                    android:layout_width="0dp"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/aether_frost_22"
+                    app:layout_constraintTop_toBottomOf="@id/iconRain"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <View
+                    android:id="@+id/progressFill"
+                    android:layout_width="0dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/gradient_ocean"
+                    app:layout_constraintStart_toStartOf="@id/progressBg"
+                    app:layout_constraintTop_toTopOf="@id/progressBg"
+                    app:layout_constraintBottom_toBottomOf="@id/progressBg" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- ===============================
+               SMART CARD — UV PEAK
+        =================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardUvPeak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="24dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+
+            app:layout_constraintTop_toBottomOf="@id/cardRain"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <FrameLayout
+                    android:id="@+id/iconUv"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:padding="12dp"
+                    android:background="@drawable/gradient_fire"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icUv"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_sun"
+                        android:tint="@color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/txtUvTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="UV peaks at 13:30"
+                    android:textSize="18sp"
+                    android:textColor="@color/aether_text_primary"
+                    app:layout_constraintStart_toEndOf="@id/iconUv"
+                    app:layout_constraintTop_toTopOf="@id/iconUv"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtUvSub"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
+                    android:text="Wear sunscreen outdoors"
+                    android:textSize="14sp"
+                    android:textColor="@color/aether_text_secondary"
+                    app:layout_constraintStart_toEndOf="@id/iconUv"
+                    app:layout_constraintTop_toBottomOf="@id/txtUvTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- ===============================
+               SUNRISE / SUNSET CARD
+        =================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSunTimes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="26dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardUvPeak"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/midGuide"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/aether_frost_14"
+                    app:layout_constraintStart_toStartOf="@id/midGuide"
+                    app:layout_constraintEnd_toEndOf="@id/midGuide"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/blockSunrise"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/midGuide"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/gradient_fire"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_sunrise"
+                            android:tint="@color/white" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:id="@+id/txtSunriseLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sunrise"
+                            android:textColor="@color/aether_text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/txtSunrise"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="06:24"
+                            android:textColor="@color/aether_text_primary"
+                            android:textSize="18sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/blockSunset"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    app:layout_constraintStart_toStartOf="@id/midGuide"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/gradient_fire"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_sunset"
+                            android:tint="@color/white" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:id="@+id/txtSunsetLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sunset"
+                            android:textColor="@color/aether_text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/txtSunset"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="18:42"
+                            android:textColor="@color/aether_text_primary"
+                            android:textSize="18sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===============================
+         METRICS GRID – CONSTRAINT LAYOUT
+ ===================================-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/metricsGrid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/cardSunTimes"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- ===== COLUMN GUIDELINES ===== -->
+
+            <!-- Left edge -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0" />
+
+            <!-- Middle vertical line (50%) -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <!-- Right edge -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="1" />
+
+            <!-- Row 1 height guideline -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridRow1Bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="160dp" />
+
+
+            <!-- =======================
+                    HUMIDITY (Top-Left)
+            ===========================-->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHumidity"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridLeft"
+                app:layout_constraintEnd_toStartOf="@id/gridMid"
+                android:layout_marginEnd="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_ocean">
+
+                    <ImageView
+                        android:id="@+id/icHumidity"
+                        android:layout_width="38dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_humidity"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHumidityLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Humidity"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="14dp" />
+
+                    <TextView
+                        android:id="@+id/txtHumidityValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="68%"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="26sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- =======================
+                    WIND (Top-Right)
+            ===========================-->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWind"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="26dp"
+
+                app:strokeWidth="0dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridMid"
+                app:layout_constraintEnd_toStartOf="@id/gridRight"
+                android:layout_marginStart="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_sky">
+
+                    <ImageView
+                        android:id="@+id/icWind"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_wind"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtWindLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Wind"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="14dp" />
+
+                    <TextView
+                        android:id="@+id/txtWindValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="12 km/h"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="26sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+
+            <!-- =======================
+                VISIBILITY (Bottom-Left)
+            ===========================-->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardVisibility"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toBottomOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridLeft"
+                app:layout_constraintEnd_toStartOf="@id/gridMid"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_emerald">
+
+                    <ImageView
+                        android:id="@+id/icVisibility"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_visibility"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtVisibilityLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Visibility"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="14dp" />
+
+                    <TextView
+                        android:id="@+id/txtVisibilityValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10 km"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="26sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+
+            <!-- =======================
+                PRESSURE (Bottom-Right)
+            ===========================-->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPressure"
+                android:layout_width="0dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toBottomOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridMid"
+                app:layout_constraintEnd_toStartOf="@id/gridRight"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_cosmic">
+
+                    <ImageView
+                        android:id="@+id/icPressure"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_pressure"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtPressureLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pressure"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="14dp" />
+
+                    <TextView
+                        android:id="@+id/txtPressureValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1013 mb"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="26sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+        <!-- ===============================
+              HOURLY FORECAST (RecyclerView)
+        =================================-->
+        <TextView
+            android:id="@+id/txtHourlyTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hourly Forecast"
+            android:textColor="@color/aether_text_primary"
+            android:textSize="20sp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/metricsGrid"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/btnHourlyViewAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View All"
+            android:textColor="@color/aether_purple_start"
+            android:textSize="14sp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintBaseline_toBaselineOf="@id/txtHourlyTitle"
+            app:layout_constraintEnd_toEndOf="parent" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardHourly"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardUseCompatPadding="false"
+
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/txtHourlyTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+           <LinearLayout
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:orientation="vertical"
+               android:background="@drawable/neo_card">
+               <androidx.recyclerview.widget.RecyclerView
+                   android:id="@+id/rvHourly"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:paddingTop="14dp"
+                   android:paddingBottom="14dp"
+                   android:paddingStart="12dp"
+                   android:paddingEnd="12dp"
+                   app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                   android:clipToPadding="false"
+                   android:overScrollMode="never" />
+           </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===============================
+                AIR QUALITY CARD INLINE
+        ===================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAqi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="40dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:cardUseCompatPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/cardHourly"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/txtAqiLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Air Quality Index"
+                    android:textColor="@color/aether_text_secondary"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtAqiValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="72"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="36sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="@id/txtAqiLabel"
+                    app:layout_constraintTop_toBottomOf="@id/txtAqiLabel" />
+
+                <TextView
+                    android:id="@+id/txtAqiStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Moderate · Acceptable"
+                    android:textColor="@color/aether_success"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintStart_toStartOf="@id/txtAqiValue"
+                    app:layout_constraintTop_toBottomOf="@id/txtAqiValue" />
+
+                <FrameLayout
+                    android:id="@+id/aqiIconContainer"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:padding="16dp"
+                    android:background="@drawable/gradient_emerald"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icAqi"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_wind"
+                        android:tint="@color/white" />
+                </FrameLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
