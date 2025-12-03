@@ -1,14 +1,961 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollWhatToWear"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.WhatToWearFragment">
+    android:background="@color/aether_bg_dark"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp">
 
-</FrameLayout>
+        <!-- ================================
+                 TOP BAR
+        ==================================-->
+        <LinearLayout
+            android:id="@+id/topBarWhatToWear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="What to Wear"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="22sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/txtSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="AI-powered outfit suggestions"
+                    android:textColor="@color/aether_text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/headerIconContainer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/gradient_primary_round"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/icWardrobe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sun"
+                    app:tint="@color/white" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- ================================
+              CURRENT CONDITIONS CARD
+        ==================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardCurrentConditions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/topBarWhatToWear"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:id="@+id/conditionsTextBlock"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/conditionsIcon"
+                    app:layout_constraintHorizontal_bias="0">
+
+                    <TextView
+                        android:id="@+id/txtCurrentConditionsLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Current Conditions"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/txtCurrentTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="24°C"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="26sp"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:id="@+id/txtCurrentCondition"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Partly Cloudy"
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/conditionsIcon"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:background="@drawable/gradient_ocean"
+                    android:padding="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icCurrentWeather"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_sun"
+                        app:tint="@color/white" />
+                </FrameLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ================================
+              STYLE SELECTOR (TABLAYOUT)
+        ==================================-->
+        <TextView
+            android:id="@+id/txtStyleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Your Style"
+            android:textColor="@color/aether_text_secondary"
+            android:textSize="14sp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/cardCurrentConditions"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabStyle"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+
+            android:background="@drawable/tab_container_bg"
+
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            app:tabRippleColor="@android:color/transparent"
+
+            app:tabIndicator="@drawable/tab_indicator_style"
+            app:tabIndicatorGravity="center"
+            app:tabIndicatorHeight="40dp"
+            app:tabIndicatorFullWidth="false"
+            app:tabTextColor="@color/style_tab_text_selector"
+
+            app:layout_constraintTop_toBottomOf="@id/txtStyleLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+
+                android:text="Casual" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Formal" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Sport" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+
+        <!-- ================================
+              RECOMMENDED ITEMS SECTION
+        ==================================-->
+        <TextView
+            android:id="@+id/txtRecommendedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Recommended Items"
+            android:textColor="@color/aether_text_primary"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/tabStyle"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Light Jacket (Essential) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardItemJacket"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/txtRecommendedLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="@drawable/gradient_ocean"
+                android:padding="20dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/icItemJacket"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_wind"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtItemJacketTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Light Jacket"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/txtItemJacketReason"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Perfect for 24°C."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtItemJacketPriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Essential"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Sunglasses (Recommended) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardItemSunglasses"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardItemJacket"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="@drawable/gradient_amber"
+                android:padding="20dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/icItemSunglasses"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_sun"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtItemSunglassesTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sunglasses"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/txtItemSunglassesReason"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="UV index at 7."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtItemSunglassesPriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recommended"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Light Layers (Optional) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardItemLayers"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardItemSunglasses"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="@drawable/gradient_cosmic"
+                android:padding="20dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/icItemLayers"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_smile"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtItemLayersTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Light Layers"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/txtItemLayersReason"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Breezy in the evening."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtItemLayersPriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Optional"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ================================
+                 TODAY'S TIPS
+        ==================================-->
+        <TextView
+            android:id="@+id/txtTipsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Today's Tips"
+            android:textColor="@color/aether_text_primary"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/cardItemLayers"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Tips container: 3 stacked neo cards -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTipHydration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/txtTipsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/neo_card"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/gradient_ocean"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_wind"
+                        app:tint="@color/white" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtTipHydrationTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hydration Alert"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/txtTipHydrationDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Temperature rising to 28°C. Carry water."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTipUv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardTipHydration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/neo_card"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/gradient_fire"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_sun"
+                        app:tint="@color/white" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtTipUvTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="UV Protection"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/txtTipUvDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="UV index is high. Apply SPF 30+."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTipEvening"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardTipUv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/neo_card"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/gradient_cosmic"
+                    android:padding="10dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_sunset"
+                        app:tint="@color/white" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtTipEveningTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Evening Cool Down"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/txtTipEveningDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Temperature drops to 19°C after 6 PM."
+                        android:textColor="@color/aether_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ================================
+                 SMART INSIGHT CARD
+        ==================================-->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSmartInsight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@id/cardTipEvening"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neo_card"
+                android:padding="20dp">
+
+                <FrameLayout
+                    android:id="@+id/iconSmartInsight"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/gradient_ocean"
+                    android:padding="12dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/icSmartInsight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_smile"
+                        app:tint="@color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/txtSmartInsightTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Smart Insight"
+                    android:textColor="@color/aether_text_primary"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toEndOf="@id/iconSmartInsight"
+                    app:layout_constraintTop_toTopOf="@id/iconSmartInsight"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtSmartInsightBody"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
+                    android:text="Perfect weather for outdoor activities. Temperature is ideal, but don't forget sun protection as UV levels peak around 13:30 PM."
+                    android:textColor="@color/aether_text_secondary"
+                    android:textSize="13sp"
+                    app:layout_constraintStart_toEndOf="@id/iconSmartInsight"
+                    app:layout_constraintTop_toBottomOf="@id/txtSmartInsightTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ================================
+             PERFECT WEATHER FOR (2-COLUMN GRID)
+        ==================================-->
+        <TextView
+            android:id="@+id/txtPerfectWeatherLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:text="Perfect Weather For"
+            android:textColor="@color/aether_text_primary"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/cardSmartInsight"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/perfectWeatherGrid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/txtPerfectWeatherLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Guidelines: left, mid, right -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="1" />
+
+            <!-- Row guideline -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/gridRow1Bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="140dp" />
+
+            <!-- Running -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActivityRunning"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridLeft"
+                app:layout_constraintEnd_toStartOf="@id/gridMid">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@drawable/neo_card"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/gradient_emerald"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/icRunning"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_wind"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/txtRunning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Running"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Cycling -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActivityCycling"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridMid"
+                app:layout_constraintEnd_toStartOf="@id/gridRight">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@drawable/neo_card"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/gradient_ocean"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/icCycling"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_wind"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/txtCycling"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Cycling"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Photography -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActivityPhotography"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toBottomOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridLeft"
+                app:layout_constraintEnd_toStartOf="@id/gridMid">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@drawable/neo_card"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/gradient_sky"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/icPhotography"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_sunrise"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/txtPhotography"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Photography"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Picnic -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActivityPicnic"
+                android:layout_width="0dp"
+                android:layout_height="140dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintTop_toBottomOf="@id/gridRow1Bottom"
+                app:layout_constraintStart_toStartOf="@id/gridMid"
+                app:layout_constraintEnd_toStartOf="@id/gridRight">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@drawable/neo_card"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/gradient_emerald"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/icPicnic"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_sun"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/txtPicnic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Picnic"
+                        android:textColor="@color/aether_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
