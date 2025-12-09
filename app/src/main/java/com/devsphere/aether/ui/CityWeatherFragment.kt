@@ -11,19 +11,19 @@ import com.devsphere.aether.databinding.FragmentCityWeatherBinding
 
 class CityWeatherFragment : Fragment() {
 
-
-    private lateinit var _binding: FragmentCityWeatherBinding
-    private val binding get() = _binding
-
+    private var _binding: FragmentCityWeatherBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentCityWeatherBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

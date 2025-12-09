@@ -24,4 +24,8 @@
         android:name="com.devsphere.aether.ui.WhatToWearFragment"
         android:label="fragment_what_to_wear"
         tools:layout="@layout/fragment_what_to_wear" />
+    <fragment
+        android:id="@+id/cityWeatherFragment"
+        android:name="com.devsphere.aether.ui.CityWeatherFragment"
+        android:label="CityWeatherFragment" />
 </navigation>

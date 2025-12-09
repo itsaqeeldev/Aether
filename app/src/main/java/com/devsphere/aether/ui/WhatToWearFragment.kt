@@ -12,17 +12,11 @@ import com.devsphere.aether.databinding.FragmentWhatToWearBinding
 class WhatToWearFragment : Fragment() {
 
 
-    private lateinit var _binding: FragmentWhatToWearBinding
-    private val binding get() = _binding
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentWhatToWearBinding.inflate(inflater, container, false)
-        return binding.root
-
+        return inflater.inflate(R.layout.fragment_what_to_wear, container, false)
     }
 
 

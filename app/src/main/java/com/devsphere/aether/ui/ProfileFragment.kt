@@ -12,20 +12,13 @@ import com.devsphere.aether.databinding.FragmentProfileBinding
 class ProfileFragment : Fragment() {
 
 
-    private lateinit var _binding: FragmentProfileBinding
-    private val binding get() = _binding
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
-        return binding.root
+       return inflater.inflate(R.layout.fragment_profile, container, false)
     }
-
-
-
 
 
 }

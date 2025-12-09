@@ -10,10 +10,8 @@ import com.devsphere.aether.databinding.FragmentLocationsBinding
 
 class LocationsFragment : Fragment() {
 
-
-    private lateinit var _binding: FragmentLocationsBinding
-    private val binding get() = _binding
-
+    private var _binding: FragmentLocationsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,8 +19,10 @@ class LocationsFragment : Fragment() {
     ): View {
         _binding = FragmentLocationsBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
