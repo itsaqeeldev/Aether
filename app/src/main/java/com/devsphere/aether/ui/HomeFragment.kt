@@ -1,72 +1,246 @@
 package com.devsphere.aether.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.devsphere.aether.R
-import com.devsphere.aether.models.HourlyForecastUi
+import com.devsphere.aether.databinding.FragmentHomeBinding
+import com.devsphere.aether.viewmodels.HomeViewModel
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+/**
+ * Home Fragment - Main weather display screen
+ * Shows current conditions, forecast, AQI, and smart insights
+ *
+ * Using View Binding for type-safe view access
+ */
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
+    // View Binding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: HomeViewModel by viewModels()
     private lateinit var hourlyAdapter: HourlyForecastAdapter
 
+    // Permission launcher
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+
+        if (fineLocationGranted || coarseLocationGranted) {
+            // Permission granted, load weather
+            viewModel.detectAndLoadWeather()
+        } else {
+            // Permission denied, show message
+            showSnackbar("Location permission is required to show weather for your area")
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Hero image with Glide (you can swap URL based on weather/time of day)
-        val imgHero: ImageView = view.findViewById(R.id.imgHero)
-        Glide.with(this)
-            .load("https://images.unsplash.com/photo-1627817783271-1b8d21266a74?auto=format&fit=crop&w=1080&q=80")
-            .into(imgHero)
+        setupRecyclerView()
+        setupSwipeRefresh()
+        observeUiState()
+        checkLocationPermission()
+    }
 
-        // Current weather text views (map from Open-Meteo current & daily endpoints)
-        val txtLocation: TextView = view.findViewById(R.id.txtLocation)
-        val txtTemp: TextView = view.findViewById(R.id.txtTemp)
-        val txtTempUnit: TextView = view.findViewById(R.id.txtTempUnit)
-        val txtCondition: TextView = view.findViewById(R.id.txtCondition)
-        val txtHighLow: TextView = view.findViewById(R.id.txtHighLow)
+    override fun onResume() {
+        super.onResume()
+        // Check if auto-refresh is needed
+        viewModel.checkAutoRefresh()
+    }
 
-        // Example static for now – later bind from API:
-        txtLocation.text = "San Francisco"
-        txtTemp.text = "24"
-        txtTempUnit.text = "°C"
-        txtCondition.text = "Partly cloudy"
-        txtHighLow.text = "H:28°  L:18°"
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Prevent memory leaks
+    }
 
-        // Setup hourly RecyclerView
-        val rvHourly: RecyclerView = view.findViewById(R.id.rvHourly)
+    /**
+     * Setup RecyclerView for hourly forecast
+     */
+    private fun setupRecyclerView() {
         hourlyAdapter = HourlyForecastAdapter(emptyList())
-        rvHourly.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        rvHourly.adapter = hourlyAdapter
+        binding.rvHourly.apply {
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
+            adapter = hourlyAdapter
+        }
+    }
 
-        // TODO: Replace with real Open-Meteo data
-        val demoHourly = listOf(
-            HourlyForecastUi("Now", 24, R.drawable.ic_sun),
-            HourlyForecastUi("14:00", 26, R.drawable.ic_sun),
-            HourlyForecastUi("15:00", 28, R.drawable.ic_sun),
-            HourlyForecastUi("16:00", 27, R.drawable.ic_rain),
-            HourlyForecastUi("17:00", 25, R.drawable.ic_rain),
-            HourlyForecastUi("18:00", 23, R.drawable.ic_rain)
+    /**
+     * Setup pull-to-refresh
+     */
+    private fun setupSwipeRefresh() {
+        binding.root.setOnRefreshListener {
+            viewModel.refreshWeather()
+        }
+
+        // Set color scheme
+        binding.root.setColorSchemeResources(
+            R.color.aether_purple_start,
+            R.color.aether_blue_end
         )
-        hourlyAdapter.submitList(demoHourly)
+    }
 
+    /**
+     * Observe UI state changes from ViewModel
+     */
+    private fun observeUiState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    updateUI(state)
+                }
+            }
+        }
+    }
 
+    /**
+     * Update UI based on state
+     */
+    private fun updateUI(state: com.devsphere.aether.models.HomeUiState) {
+        // Loading state
+        binding.root.isRefreshing = state.isRefreshing
+
+        // Error handling
+        state.errorMessage?.let { message ->
+            showSnackbar(message)
+            viewModel.clearError()
+        }
+
+        // Hero image
+        state.heroImageUrl?.let { url ->
+            Glide.with(this)
+                .load(url)
+                .centerCrop()
+                .into(binding.imgHero)
+        }
+
+        // Location and temperature
+        binding.txtLocation.text = state.locationName ?: "Unknown Location"
+        binding.txtTemp.text = state.currentTemp ?: "--"
+        binding.txtCondition.text = state.currentCondition ?: "--"
+        binding.txtHighLow.text = state.highLowTemp ?: "--"
+
+        // Sun times
+        binding.txtSunrise.text = state.sunriseTime ?: "--"
+        binding.txtSunset.text = state.sunsetTime ?: "--"
+
+        // Rain card
+        binding.cardRain.visibility = if (state.showRainCard) View.VISIBLE else View.GONE
+        binding.txtRainTitle.text = state.rainMessage ?: "No rain expected"
+
+        // Metrics
+        binding.txtHumidityValue.text = state.humidity ?: "--"
+        binding.txtWindValue.text = state.windSpeed ?: "--"
+        binding.txtVisibilityValue.text = state.visibility ?: "--"
+        binding.txtPressureValue.text = state.pressure ?: "--"
+
+        // AQI
+        binding.txtAqiValue.text = state.aqiValue ?: "--"
+        binding.txtAqiStatus.text = state.aqiCategory ?: "Unknown"
+
+        // Set AQI color
+        state.aqiColor?.let { colorHex ->
+            try {
+                val color = Color.parseColor(colorHex)
+                binding.aqiIconContainer.setBackgroundColor(color)
+                binding.txtAqiStatus.setTextColor(color)
+            } catch (e: Exception) {
+                // Ignore invalid color
+            }
+        }
+
+        // Hourly forecast
+        if (state.hourlyForecast.isNotEmpty()) {
+            hourlyAdapter.submitList(state.hourlyForecast)
+        }
+    }
+
+    /**
+     * Check and request location permission
+     */
+    private fun checkLocationPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Permission already granted
+                viewModel.detectAndLoadWeather()
+            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Show rationale and request permission
+                showSnackbar("Location permission is needed to show weather for your area") {
+                    requestLocationPermission()
+                }
+            }
+
+            else -> {
+                // Request permission
+                requestLocationPermission()
+            }
+        }
+    }
+
+    /**
+     * Request location permission
+     */
+    private fun requestLocationPermission() {
+        locationPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+    }
+
+    /**
+     * Show Snackbar with message
+     */
+    private fun showSnackbar(message: String, action: (() -> Unit)? = null) {
+        val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+
+        // Rename 'it' to 'retryAction' to avoid confusion with the View inside setAction
+        action?.let { retryAction ->
+            snackbar.setAction("RETRY") {
+                retryAction.invoke()
+            }
+        }
+
+        snackbar.show()
     }
 }
