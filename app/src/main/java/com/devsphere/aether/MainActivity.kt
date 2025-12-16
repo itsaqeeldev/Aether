@@ -14,9 +14,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState == null) {
-            setContentView(R.layout.activity_main)
-        }
+
+        setContentView(R.layout.activity_main)
+
 
         val bottomNavContainer = findViewById<View>(R.id.bottomNavContainer)
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)

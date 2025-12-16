@@ -41,7 +41,6 @@ class AetherRepository @Inject constructor(
             )
         }
 
-    // ... (Your existing getMinutelyForecast implementation) ...
     suspend fun getMinutelyForecast(
         latitude: Double,
         longitude: Double,
@@ -94,7 +93,7 @@ class AetherRepository @Inject constructor(
         return if (result != null) {
             ApiResult.Success(result)
         } else {
-            ApiResult.Error("Location not found",404, )
+            ApiResult.Error("Location not found",404 )
         }
     }
 }

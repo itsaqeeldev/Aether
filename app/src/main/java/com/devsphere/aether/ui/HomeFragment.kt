@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -161,6 +162,11 @@ class HomeFragment : Fragment() {
         // Rain card
         binding.cardRain.visibility = if (state.showRainCard) View.VISIBLE else View.GONE
         binding.txtRainTitle.text = state.rainMessage ?: "No rain expected"
+
+        binding.cardUvPeak.isVisible = state.showUvCard
+        binding.txtUvTitle.text = state.uvTitle ?: "UV"
+        binding.txtUvSub.text = state.uvSub ?: "--"
+
 
         // Metrics
         binding.txtHumidityValue.text = state.humidity ?: "--"

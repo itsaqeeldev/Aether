@@ -68,4 +68,17 @@
     <color name="aether_shadow_glow_purple">#598B5CF6</color>
     <color name="aether_shadow_glow_blue">#4D3B82F6</color>
 
+    <!-- Add these colors to your existing colors.xml -->
+
+    <!-- Warning colors -->
+    <color name="aether_warning_bg">#33FFAB00</color>
+    <color name="aether_warning_text">#FFAB00</color>
+
+
+    <!-- Alpha variants -->
+    <color name="aether_purple_start_alpha_10">#1A8B5CF6</color>
+    <color name="aether_purple_start_alpha_20">#338B5CF6</color>
+
+
+
 </resources>

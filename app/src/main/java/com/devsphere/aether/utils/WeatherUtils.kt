@@ -204,6 +204,28 @@ object WeatherUtils {
         }
     }
 
+    fun uvLevel(uv: Double?): String {
+        if (uv == null) return "Unknown"
+        return when {
+            uv < 3 -> "Low"
+            uv < 6 -> "Moderate"
+            uv < 8 -> "High"
+            uv < 11 -> "Very High"
+            else -> "Extreme"
+        }
+    }
+
+    fun uvAdvice(uv: Double?): String {
+        if (uv == null) return "UV data unavailable."
+        return when {
+            uv < 3 -> "Low risk. Sunglasses optional."
+            uv < 6 -> "Use SPF 30+. Limit long exposure."
+            uv < 8 -> "SPF 50+ recommended. Seek shade midday."
+            uv < 11 -> "Avoid midday sun. Cover up + SPF 50+."
+            else -> "Extreme. Stay indoors if possible."
+        }
+    }
+
     /**
      * Format last update time
      */

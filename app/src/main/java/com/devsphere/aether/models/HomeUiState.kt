@@ -50,5 +50,11 @@ data class HomeUiState(
     val hourlyForecast: List<HourlyForecastUi> = emptyList(),
 
     // Last update timestamp
-    val lastUpdateTime: Long = 0L
-)
+    val lastUpdateTime: Long = 0L,
+
+    // UV
+    val showUvCard: Boolean = false,
+    val uvTitle: String? = null,
+    val uvSub: String? = null,
+
+    )

@@ -10,8 +10,14 @@ interface AirQualityApi {
     suspend fun getAirQuality(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
+
+        // ✅ ADD THIS LINE
+        @Query("current") current: String = "european_aqi",
+
         @Query("hourly") hourly: String =
             "pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,carbon_monoxide,european_aqi",
+
         @Query("timezone") timezone: String = "auto"
     ): AirQualityResponse
+
 }

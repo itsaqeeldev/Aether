@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardCity"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/neo_card"
+        android:padding="16dp">
+
+        <!-- Location Icon Container -->
+        <FrameLayout
+            android:id="@+id/iconContainer"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/gradient_primary_round"
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/icLocation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_location"
+                app:tint="@color/white" />
+        </FrameLayout>
+
+        <!-- City Name -->
+        <TextView
+            android:id="@+id/txtCityName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:text="Paris"
+            android:textColor="@color/aether_text_primary"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toEndOf="@id/iconContainer"
+            app:layout_constraintEnd_toStartOf="@id/tempContainer"
+            app:layout_constraintTop_toTopOf="@id/iconContainer"
+            app:layout_constraintBottom_toTopOf="@id/txtCountry"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <!-- Country -->
+        <TextView
+            android:id="@+id/txtCountry"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="France"
+            android:textColor="@color/aether_text_secondary"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/txtCityName"
+            app:layout_constraintEnd_toStartOf="@id/tempContainer"
+            app:layout_constraintTop_toBottomOf="@id/txtCityName"
+            app:layout_constraintBottom_toBottomOf="@id/iconContainer" />
+
+        <!-- Temperature Container -->
+        <FrameLayout
+            android:id="@+id/tempContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Temperature Text -->
+            <TextView
+                android:id="@+id/txtTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="18°"
+                android:textColor="@color/aether_text_primary"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- Loading Spinner -->
+            <ProgressBar
+                android:id="@+id/progressTemp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:visibility="gone"
+                android:indeterminateTint="@color/aether_purple_start" />
+        </FrameLayout>
+
+        <!-- Already Added Indicator -->
+        <ImageView
+            android:id="@+id/icAdded"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_check_circle"
+            app:tint="@color/aether_success"
+            app:layout_constraintEnd_toStartOf="@id/tempContainer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
