@@ -3,6 +3,8 @@ package com.devsphere.aether.di
 import com.devsphere.aether.data.remote.api.AirQualityApi
 import com.devsphere.aether.data.remote.api.GeocodingApi
 import com.devsphere.aether.data.remote.api.WeatherApi
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -85,4 +87,10 @@ object NetworkModule {
     @Singleton
     fun provideGeocodingApi(@Named("geocodingRetrofit") retrofit: Retrofit): GeocodingApi =
         retrofit.create(GeocodingApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson =
+        GsonBuilder().create()
+
 }

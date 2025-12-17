@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Home Fragment - Main weather display screen
- * Shows current conditions, forecast, AQI, and smart insights
+ * Shows current conditions, forecast, AQI, mood, and smart insights
  *
  * Using View Binding for type-safe view access
  */
@@ -76,8 +76,6 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Check if auto-refresh is needed
-        viewModel.checkAutoRefresh()
     }
 
     override fun onDestroyView() {
@@ -159,14 +157,26 @@ class HomeFragment : Fragment() {
         binding.txtSunrise.text = state.sunriseTime ?: "--"
         binding.txtSunset.text = state.sunsetTime ?: "--"
 
+        // Mood card
+        binding.cardMood.isVisible = state.showMoodCard
+        if (state.showMoodCard) {
+            binding.txtMoodTitle.text = state.moodTitle ?: "Mood"
+            binding.txtMoodSub.text = state.moodDescription ?: "Based on current weather conditions"
+
+            // Set mood icon if provided
+            state.moodIconRes?.let { iconRes ->
+                binding.icMood.setImageResource(iconRes)
+            }
+        }
+
         // Rain card
         binding.cardRain.visibility = if (state.showRainCard) View.VISIBLE else View.GONE
         binding.txtRainTitle.text = state.rainMessage ?: "No rain expected"
 
+        // UV card
         binding.cardUvPeak.isVisible = state.showUvCard
         binding.txtUvTitle.text = state.uvTitle ?: "UV"
         binding.txtUvSub.text = state.uvSub ?: "--"
-
 
         // Metrics
         binding.txtHumidityValue.text = state.humidity ?: "--"

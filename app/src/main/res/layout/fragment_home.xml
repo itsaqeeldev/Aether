@@ -89,6 +89,7 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:padding="10dp"
+                            android:visibility="gone"
                             android:background="@drawable/neo_circle"
                             android:src="@drawable/ic_bell"
                             app:tint="@color/nav_icon_selector" />
@@ -99,6 +100,7 @@
                             android:layout_height="40dp"
                             android:layout_marginStart="12dp"
                             android:padding="10dp"
+                            android:visibility="gone"
                             android:background="@drawable/gradient_primary_round"
                             android:src="@drawable/ic_plus"
                             app:tint="@color/white" />

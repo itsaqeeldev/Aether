@@ -13,6 +13,7 @@ import com.devsphere.aether.models.HourlyForecastUi
 import com.devsphere.aether.network.ApiResult
 import com.devsphere.aether.utils.LocationManager
 import com.devsphere.aether.utils.LocationResult
+import com.devsphere.aether.utils.MoodGenerator
 import com.devsphere.aether.utils.ReverseGeocoder
 import com.devsphere.aether.utils.WeatherImageMapper
 import com.devsphere.aether.utils.WeatherUtils
@@ -107,12 +108,15 @@ class HomeViewModel @Inject constructor(
                     val daily = weather.daily
                     val hourly = weather.hourly
 
-                    // AQI fallback logic (CURRENT → HOURLY)
+                    // AQI fallback logic (CURRENT â†’ HOURLY)
                     val aqi = airQuality?.current?.europeanAqi
                         ?: airQuality?.hourly?.europeanAqi?.firstOrNull()
 
                     // UV peak (HOURLY UV INDEX)
                     val uvUi = buildUvUi(hourly, daily?.uvIndexMax?.firstOrNull())
+
+                    // Generate weather mood
+                    val mood = MoodGenerator.generateMood(weather, aqi)
 
                     _uiState.update { state ->
                         state.copy(
@@ -160,6 +164,13 @@ class HomeViewModel @Inject constructor(
                             showUvCard = uvUi.show,
                             uvTitle = uvUi.title,
                             uvSub = uvUi.sub,
+
+                            // Mood
+                            showMoodCard = mood != null,
+                            moodEmoji = mood?.emoji,
+                            moodTitle = mood?.title,
+                            moodDescription = mood?.description,
+                            moodIconRes = R.drawable.ic_smile,
 
                             // Hourly forecast
                             hourlyForecast = buildHourlyForecast(hourly, current?.isDay),
@@ -284,7 +295,7 @@ class HomeViewModel @Inject constructor(
 
         val level = WeatherUtils.uvLevel(peakUv)
         val advice = WeatherUtils.uvAdvice(peakUv)
-        val sub = "UV $uvInt • $level\n$advice"
+        val sub = "UV $uvInt  $level\n$advice"
 
         return UvUi(show = true, title = title, sub = sub)
     }

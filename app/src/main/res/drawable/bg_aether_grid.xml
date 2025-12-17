@@ -52,7 +52,7 @@
 
     <!-- subtle outer glow -->
     <path
-        android:strokeWidth="2"
+        android:strokeWidth="0"
         android:strokeColor="#262F5F"
         android:pathData="M4,4h352v792h-352z" />
 </vector>

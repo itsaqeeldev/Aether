@@ -72,12 +72,17 @@ class SavedLocationsAdapter(
                 txtCountry.text = location.countryCode ?: location.country
 
                 // Weather
-                txtTemp.text = location.temperature
-                txtCondition.text = location.condition
+                txtTemp.visibility= View.INVISIBLE
+                txtTemp.visibility= View.INVISIBLE
+                txtCondition.visibility= View.INVISIBLE
+
 
                 // Weather icon
                 val iconRes = getWeatherIconRes(location.weatherCode)
                 icWeather.setImageResource(iconRes)
+                icWeather.visibility= View.INVISIBLE
+
+
 
                 // Background image
                 location.imageUrl?.let { url ->

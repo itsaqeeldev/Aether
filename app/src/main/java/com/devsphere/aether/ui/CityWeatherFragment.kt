@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
@@ -21,7 +20,6 @@ import com.devsphere.aether.R
 import com.devsphere.aether.adapter.DailyForecastAdapter
 import com.devsphere.aether.viewmodels.CityWeatherUiState
 import com.devsphere.aether.viewmodels.CityWeatherViewModel
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

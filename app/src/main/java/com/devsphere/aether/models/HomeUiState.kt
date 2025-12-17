@@ -57,4 +57,11 @@ data class HomeUiState(
     val uvTitle: String? = null,
     val uvSub: String? = null,
 
+    // Mood
+    val showMoodCard: Boolean = false,
+    val moodEmoji: String? = null,
+    val moodTitle: String? = null,
+    val moodDescription: String? = null,
+    val moodIconRes: Int? = null,
+
     )

@@ -1,14 +1,16 @@
 package com.devsphere.aether.utils
 
 /**
- * Cache policy for weather data with TTL-based validation
+ * Enhanced cache policy with optimized TTL values
+ * Reduces unnecessary API calls while keeping data fresh
  */
 object CachePolicy {
 
-    // TTL (Time To Live) values in milliseconds
-    const val CURRENT_WEATHER_TTL = 10 * 60 * 1000L      // 10 minutes
-    const val FORECAST_TTL = 2 * 60 * 60 * 1000L         // 2 hours
-    const val AQI_TTL = 30 * 60 * 1000L                  // 30 minutes
+    // TTL (Time To Live) values in milliseconds - OPTIMIZED
+    const val CURRENT_WEATHER_TTL = 30 * 60 * 1000L      // 30 minutes (was 10)
+    const val FORECAST_TTL = 6 * 60 * 60 * 1000L         // 6 hours (was 2)
+    const val AQI_TTL = 60 * 60 * 1000L                  // 1 hour (was 30 min)
+    const val SUGGESTIONS_TTL = 6 * 60 * 60 * 1000L      // 6 hours (NEW - for What To Wear)
 
     /**
      * Determines if data should be fetched from network based on TTL
@@ -47,6 +49,14 @@ object CachePolicy {
      */
     fun shouldRefreshAqi(lastUpdated: Long?): Boolean {
         return shouldFetch(lastUpdated, AQI_TTL)
+    }
+
+    /**
+     * Check if What To Wear suggestions should be refreshed
+     * NEW: Prevents re-generating suggestions on every fragment open
+     */
+    fun shouldRefreshSuggestions(lastUpdated: Long?): Boolean {
+        return shouldFetch(lastUpdated, SUGGESTIONS_TTL)
     }
 
     /**
