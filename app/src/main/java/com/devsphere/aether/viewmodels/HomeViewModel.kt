@@ -1,5 +1,6 @@
 package com.devsphere.aether.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devsphere.aether.R
@@ -28,17 +29,23 @@ import kotlin.math.roundToInt
 class HomeViewModel @Inject constructor(
     private val repository: AetherRepository,
     private val locationManager: LocationManager,
-    private val reverseGeocoder: ReverseGeocoder
+    private val reverseGeocoder: ReverseGeocoder,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val AUTO_REFRESH_INTERVAL = 30 * 60 * 1000L
-    private var lastRefreshTime = 0L
+    // Guard flag to prevent multiple initial fetches
+    private var hasFetchedInitially: Boolean
+        get() = savedStateHandle.get<Boolean>(KEY_HAS_FETCHED) ?: false
+        set(value) = savedStateHandle.set(KEY_HAS_FETCHED, value)
 
     init {
-        detectAndLoadWeather()
+        // Only fetch on first initialization, not on configuration changes or re-navigation
+        if (!hasFetchedInitially) {
+            detectAndLoadWeather()
+        }
     }
 
     fun detectAndLoadWeather() {
@@ -46,10 +53,13 @@ class HomeViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             when (val locationResult = locationManager.getCurrentLocation()) {
-                is LocationResult.Success -> loadWeatherData(
-                    latitude = locationResult.latitude,
-                    longitude = locationResult.longitude
-                )
+                is LocationResult.Success -> {
+                    loadWeatherData(
+                        latitude = locationResult.latitude,
+                        longitude = locationResult.longitude
+                    )
+                    hasFetchedInitially = true
+                }
                 is LocationResult.Error -> _uiState.update {
                     it.copy(isLoading = false, errorMessage = locationResult.message)
                 }
@@ -70,8 +80,21 @@ class HomeViewModel @Inject constructor(
 
             val locationName = reverseGeocoder.getSimpleLocationString(latitude, longitude)
 
-            val weatherResult = repository.getWeather(latitude, longitude, forecastDays = 7)
-            val airQualityResult = repository.getAirQuality(latitude, longitude)
+            // Repository decides whether to use cache or fetch fresh data
+            val weatherResult = repository.getWeather(
+                latitude = latitude,
+                longitude = longitude,
+                forecastDays = 7,
+                forceRefresh = isRefreshing
+            )
+
+            // AQI has separate TTL - only refresh if needed or forced
+            val airQualityResult = repository.getAirQuality(
+                latitude = latitude,
+                longitude = longitude,
+                forceRefresh = isRefreshing
+            )
+
             val minutelyResult = repository.getMinutelyForecast(latitude, longitude)
 
             when (weatherResult) {
@@ -144,8 +167,6 @@ class HomeViewModel @Inject constructor(
                             lastUpdateTime = System.currentTimeMillis()
                         )
                     }
-
-                    lastRefreshTime = System.currentTimeMillis()
                 }
 
                 is ApiResult.Error -> {
@@ -161,16 +182,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Manual refresh - always bypasses cache
+     */
     fun refreshWeather() {
         val lat = _uiState.value.latitude
         val lon = _uiState.value.longitude
-        if (lat != null && lon != null) loadWeatherData(lat, lon, isRefreshing = true)
-        else detectAndLoadWeather()
-    }
-
-    fun checkAutoRefresh() {
-        val now = System.currentTimeMillis()
-        if (now - lastRefreshTime > AUTO_REFRESH_INTERVAL) refreshWeather()
+        if (lat != null && lon != null) {
+            loadWeatherData(lat, lon, isRefreshing = true)
+        } else {
+            detectAndLoadWeather()
+        }
     }
 
     fun clearError() {
@@ -251,7 +273,7 @@ class HomeViewModel @Inject constructor(
         val peakUv = peak?.uv ?: dailyUvMax
         if (peakUv == null) return UvUi(show = false, title = null, sub = null)
 
-        val peakTimeText = peak?.timeIso?.let { WeatherUtils.formatTime(it) } // "HH:mm"
+        val peakTimeText = peak?.timeIso?.let { WeatherUtils.formatTime(it) }
         val uvInt = peakUv.roundToInt()
 
         val title = if (peakTimeText != null && peakTimeText != "--") {
@@ -274,7 +296,7 @@ class HomeViewModel @Inject constructor(
         val uvs = hourly.uvIndex ?: return null
         if (times.isEmpty() || uvs.isEmpty()) return null
 
-        val today = times.firstOrNull()?.take(10) ?: return null // "YYYY-MM-DD"
+        val today = times.firstOrNull()?.take(10) ?: return null
         val n = minOf(times.size, uvs.size)
 
         var bestUv = Double.NEGATIVE_INFINITY
@@ -291,5 +313,9 @@ class HomeViewModel @Inject constructor(
         }
 
         return if (bestTime != null && bestUv.isFinite()) PeakUv(bestTime, bestUv) else null
+    }
+
+    companion object {
+        private const val KEY_HAS_FETCHED = "has_fetched_initially"
     }
 }

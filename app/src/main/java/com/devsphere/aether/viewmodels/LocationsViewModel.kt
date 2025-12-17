@@ -7,7 +7,6 @@ import com.devsphere.aether.models.SavedLocationUi
 import com.devsphere.aether.utils.LocationManager
 import com.devsphere.aether.utils.LocationResult
 import com.devsphere.aether.utils.ReverseGeocoder
-import com.devsphere.aether.utils.WeatherImageMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +37,8 @@ class LocationsViewModel @Inject constructor(
 
     /**
      * Load saved locations from database
+     * ✅ OPTIMIZATION: Display cached data only, no automatic network fetch
+     * Weather is fetched only when user taps a location to view details
      */
     private fun loadLocations() {
         viewModelScope.launch {
@@ -50,12 +51,9 @@ class LocationsViewModel @Inject constructor(
                     isLoading = false
                 ) }
 
-                // Fetch fresh weather for each location
-                entities.forEach { entity ->
-                    launch {
-                        locationRepository.fetchAndCacheWeather(entity)
-                    }
-                }
+                // ❌ REMOVED: No longer auto-fetching weather for all locations
+                // This was causing unnecessary API calls every time the screen opened
+                // Weather will be fetched when user navigates to CityWeatherFragment
             }
         }
     }
@@ -121,6 +119,7 @@ class LocationsViewModel @Inject constructor(
 
     /**
      * Navigate to city weather details
+     * ✅ Weather will be fetched by CityWeatherViewModel when screen opens
      */
     fun navigateToDetails(location: SavedLocationUi) {
         viewModelScope.launch {
@@ -129,7 +128,7 @@ class LocationsViewModel @Inject constructor(
                 cityName = location.name,
                 country = location.country,
                 countryCode = location.countryCode,
-                latitude = location.latitude ?: 0.0,  // Default if null
+                latitude = location.latitude ?: 0.0,
                 longitude = location.longitude ?: 0.0,
                 timezone = location.timezone
             ))

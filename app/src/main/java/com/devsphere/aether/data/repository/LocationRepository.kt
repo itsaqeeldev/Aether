@@ -8,6 +8,7 @@ import com.devsphere.aether.data.remote.dto.geocoding.GeocodingResult
 import com.devsphere.aether.models.PopularCity
 import com.devsphere.aether.network.ApiHandler
 import com.devsphere.aether.network.ApiResult
+import com.devsphere.aether.utils.CachePolicy
 import com.devsphere.aether.utils.WeatherImageMapper
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -143,7 +144,7 @@ class LocationRepository @Inject constructor(
 
     /**
      * Fetch current temperature for a location
-     * Used for popular cities list
+     * Used for popular cities when user explicitly requests it
      */
     suspend fun fetchCurrentTemperature(latitude: Double, longitude: Double): Int? {
         return try {
@@ -160,8 +161,22 @@ class LocationRepository @Inject constructor(
 
     /**
      * Fetch weather data for a location and update cache
+     * ✅ OPTIMIZATION: Now checks TTL before fetching
+     * Only fetches if cache is stale (older than 2 hours)
      */
-    suspend fun fetchAndCacheWeather(location: SavedLocationEntity) {
+    suspend fun fetchAndCacheWeather(
+        location: SavedLocationEntity,
+        forceRefresh: Boolean = false
+    ) {
+        // Check if cache is still valid (unless force refresh)
+        if (!forceRefresh && location.lastWeatherUpdate != null) {
+            val shouldRefresh = CachePolicy.shouldRefreshForecast(location.lastWeatherUpdate)
+            if (!shouldRefresh) {
+                // Cache is still valid, no need to fetch
+                return
+            }
+        }
+
         try {
             val response = weatherApi.getWeather(
                 latitude = location.latitude,
@@ -183,6 +198,14 @@ class LocationRepository @Inject constructor(
             )
         } catch (e: Exception) {
             // Silently fail - will use cached data
+            // This ensures we always show data even if network fails
         }
+    }
+
+    /**
+     * Check if location's cached weather is stale
+     */
+    fun isWeatherStale(location: SavedLocationEntity): Boolean {
+        return CachePolicy.shouldRefreshForecast(location.lastWeatherUpdate)
     }
 }

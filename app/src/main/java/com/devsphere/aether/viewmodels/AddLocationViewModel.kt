@@ -40,26 +40,22 @@ class AddLocationViewModel @Inject constructor(
     }
 
     /**
-     * Load popular cities and fetch their temperatures
+     * Load popular cities WITHOUT fetching temperatures
+     * ✅ OPTIMIZATION: Zero network calls when bottom sheet opens
+     * Temperature will only be fetched when user taps a city to add it
      */
     private fun loadPopularCities() {
         viewModelScope.launch {
-            val cities = PopularCity.getPopularCities().toMutableList()
+            val cities = PopularCity.getPopularCities().map { city ->
+                // Set isLoading = false and temperature = null
+                // No network fetch here
+                city.copy(temperature = null, isLoading = false)
+            }
             _uiState.update { it.copy(popularCities = cities) }
 
-            // Fetch temperatures for each city
-            cities.forEachIndexed { index, city ->
-                launch {
-                    val temp = locationRepository.fetchCurrentTemperature(
-                        city.latitude,
-                        city.longitude
-                    )
-                    val updatedCity = city.copy(temperature = temp, isLoading = false)
-                    val updatedList = _uiState.value.popularCities.toMutableList()
-                    updatedList[index] = updatedCity
-                    _uiState.update { it.copy(popularCities = updatedList) }
-                }
-            }
+            // ❌ REMOVED: No longer fetching temperatures for all cities
+            // This was causing 10+ API calls every time the bottom sheet opened
+            // Temperature will be fetched only when user taps a city (if needed)
         }
     }
 
@@ -138,7 +134,36 @@ class AddLocationViewModel @Inject constructor(
     }
 
     /**
+     * Fetch temperature for a specific popular city (called when user taps it)
+     * ✅ OPTIMIZATION: Only fetch when actually needed
+     */
+    fun fetchCityTemperature(cityIndex: Int) {
+        viewModelScope.launch {
+            val cities = _uiState.value.popularCities.toMutableList()
+            if (cityIndex !in cities.indices) return@launch
+
+            val city = cities[cityIndex]
+            if (city.temperature != null) return@launch // Already fetched
+
+            // Mark as loading
+            cities[cityIndex] = city.copy(isLoading = true)
+            _uiState.update { it.copy(popularCities = cities) }
+
+            // Fetch temperature
+            val temp = locationRepository.fetchCurrentTemperature(
+                city.latitude,
+                city.longitude
+            )
+
+            // Update with result
+            cities[cityIndex] = city.copy(temperature = temp, isLoading = false)
+            _uiState.update { it.copy(popularCities = cities) }
+        }
+    }
+
+    /**
      * Add a popular city to saved locations
+     * ✅ Now only makes ONE API call when user actually adds the city
      */
     fun addPopularCity(city: PopularCity) {
         if (_uiState.value.isMaxLocationsReached) {
