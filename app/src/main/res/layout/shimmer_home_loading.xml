@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/aether_card_bg"
+                app:cardBackgroundColor="@color/aether_bg_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/aether_card_bg"
+                app:cardBackgroundColor="@color/aether_bg_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/aether_card_bg"
+                app:cardBackgroundColor="@color/aether_bg_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
@@ -268,7 +268,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/aether_card_bg"
+                app:cardBackgroundColor="@color/aether_bg_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
@@ -403,7 +403,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                app:cardBackgroundColor="@color/aether_card_bg"
+                app:cardBackgroundColor="@color/aether_bg_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
