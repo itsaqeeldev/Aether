@@ -1,213 +1,144 @@
 package com.devsphere.aether.viewmodels
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.devsphere.aether.R
 import com.devsphere.aether.data.remote.dto.weather.CurrentBlock
 import com.devsphere.aether.data.remote.dto.weather.HourlyBlock
 import com.devsphere.aether.data.remote.dto.weather.WeatherResponse
-import com.devsphere.aether.data.repository.AetherRepository
 import com.devsphere.aether.models.HomeUiState
 import com.devsphere.aether.models.HourlyForecastUi
-import com.devsphere.aether.network.ApiResult
-import com.devsphere.aether.utils.LocationManager
-import com.devsphere.aether.utils.LocationResult
 import com.devsphere.aether.utils.MoodGenerator
-import com.devsphere.aether.utils.ReverseGeocoder
 import com.devsphere.aether.utils.WeatherImageMapper
 import com.devsphere.aether.utils.WeatherUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
+/**
+ * HomeViewModel - Transforms SharedWeatherState into Home UI-specific state
+ * No direct injection of SharedWeatherViewModel (Hilt restriction)
+ * Instead, HomeFragment will observe both ViewModels
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: AetherRepository,
-    private val locationManager: LocationManager,
-    private val reverseGeocoder: ReverseGeocoder,
-    private val savedStateHandle: SavedStateHandle
+    // No SharedWeatherViewModel injection - will be accessed from Fragment
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    // Guard flag to prevent multiple initial fetches
-    private var hasFetchedInitially: Boolean
-        get() = savedStateHandle.get<Boolean>(KEY_HAS_FETCHED) ?: false
-        set(value) = savedStateHandle.set(KEY_HAS_FETCHED, value)
-
-    init {
-        // Only fetch on first initialization, not on configuration changes or re-navigation
-        if (!hasFetchedInitially) {
-            detectAndLoadWeather()
-        }
-    }
-
-    fun detectAndLoadWeather() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            when (val locationResult = locationManager.getCurrentLocation()) {
-                is LocationResult.Success -> {
-                    loadWeatherData(
-                        latitude = locationResult.latitude,
-                        longitude = locationResult.longitude
-                    )
-                    hasFetchedInitially = true
-                }
-                is LocationResult.Error -> _uiState.update {
-                    it.copy(isLoading = false, errorMessage = locationResult.message)
-                }
-            }
-        }
-    }
-
-    fun loadWeatherData(
-        latitude: Double,
-        longitude: Double,
-        isRefreshing: Boolean = false
-    ) {
-        viewModelScope.launch {
-            if (isRefreshing) _uiState.update { it.copy(isRefreshing = true) }
-            else _uiState.update { it.copy(isLoading = true) }
-
-            _uiState.update { it.copy(latitude = latitude, longitude = longitude) }
-
-            val locationName = reverseGeocoder.getSimpleLocationString(latitude, longitude)
-
-            // Repository decides whether to use cache or fetch fresh data
-            val weatherResult = repository.getWeather(
-                latitude = latitude,
-                longitude = longitude,
-                forecastDays = 7,
-                forceRefresh = isRefreshing
-            )
-
-            // AQI has separate TTL - only refresh if needed or forced
-            val airQualityResult = repository.getAirQuality(
-                latitude = latitude,
-                longitude = longitude,
-                forceRefresh = isRefreshing
-            )
-
-            val minutelyResult = repository.getMinutelyForecast(latitude, longitude)
-
-            when (weatherResult) {
-                is ApiResult.Success -> {
-                    val weather = weatherResult.data
-                    val airQuality = (airQualityResult as? ApiResult.Success)?.data
-                    val minutely = (minutelyResult as? ApiResult.Success)?.data
-
-                    val current = weather.current
-                    val daily = weather.daily
-                    val hourly = weather.hourly
-
-                    // AQI fallback logic (CURRENT â†’ HOURLY)
-                    val aqi = airQuality?.current?.europeanAqi
-                        ?: airQuality?.hourly?.europeanAqi?.firstOrNull()
-
-                    // UV peak (HOURLY UV INDEX)
-                    val uvUi = buildUvUi(hourly, daily?.uvIndexMax?.firstOrNull())
-
-                    // Generate weather mood
-                    val mood = MoodGenerator.generateMood(weather, aqi)
-
-                    _uiState.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            errorMessage = null,
-
-                            weather = weather,
-                            airQuality = airQuality,
-                            minutelyForecast = minutely,
-                            locationName = locationName,
-
-                            // Hero
-                            heroImageUrl = WeatherImageMapper.getImageUrl(
-                                current?.weatherCode,
-                                current?.isDay
-                            ),
-                            currentTemp = current?.temperature?.toInt()?.toString() ?: "--",
-                            currentCondition = WeatherImageMapper.getConditionText(current?.weatherCode),
-                            highLowTemp = WeatherUtils.formatHighLow(
-                                daily?.tempMax?.firstOrNull(),
-                                daily?.tempMin?.firstOrNull()
-                            ),
-
-                            // Sun
-                            sunriseTime = WeatherUtils.formatTime(daily?.sunrise?.firstOrNull()),
-                            sunsetTime = WeatherUtils.formatTime(daily?.sunset?.firstOrNull()),
-
-                            // Rain
-                            rainMessage = calculateRainMessage(current, minutely, hourly),
-                            showRainCard = shouldShowRainCard(current, minutely, hourly),
-
-                            // Metrics
-                            humidity = WeatherUtils.formatHumidity(current?.humidity),
-                            windSpeed = WeatherUtils.formatWindSpeed(current?.windSpeed),
-                            visibility = WeatherUtils.formatVisibility(current?.visibility),
-                            pressure = WeatherUtils.formatPressure(current?.pressure),
-
-                            // AQI
-                            aqiValue = aqi?.toString() ?: "--",
-                            aqiCategory = WeatherUtils.formatAqiCategory(aqi),
-                            aqiColor = WeatherUtils.getAqiColorHex(aqi),
-
-                            // UV card
-                            showUvCard = uvUi.show,
-                            uvTitle = uvUi.title,
-                            uvSub = uvUi.sub,
-
-                            // Mood
-                            showMoodCard = mood != null,
-                            moodEmoji = mood?.emoji,
-                            moodTitle = mood?.title,
-                            moodDescription = mood?.description,
-                            moodIconRes = R.drawable.ic_smile,
-
-                            // Hourly forecast
-                            hourlyForecast = buildHourlyForecast(hourly, current?.isDay),
-
-                            lastUpdateTime = System.currentTimeMillis()
-                        )
-                    }
-                }
-
-                is ApiResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            errorMessage = weatherResult.message
-                        )
-                    }
-                }
-            }
-        }
+    /**
+     * Transform shared weather state into Home-specific UI state
+     * Called from Fragment when SharedWeatherState changes
+     */
+    fun updateFromSharedState(sharedState: SharedWeatherState) {
+        _uiState.value = transformToHomeUiState(sharedState)
     }
 
     /**
-     * Manual refresh - always bypasses cache
+     * Transform shared weather state into Home-specific UI state
      */
-    fun refreshWeather() {
-        val lat = _uiState.value.latitude
-        val lon = _uiState.value.longitude
-        if (lat != null && lon != null) {
-            loadWeatherData(lat, lon, isRefreshing = true)
-        } else {
-            detectAndLoadWeather()
-        }
-    }
+    private fun transformToHomeUiState(sharedState: SharedWeatherState): HomeUiState {
+        val weather = sharedState.weather
+        val airQuality = sharedState.airQuality
+        val minutely = sharedState.minutelyForecast
 
-    fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
+        // If still loading or no data, return loading state
+        if (sharedState.isLoading && weather == null) {
+            return HomeUiState(
+                isLoading = true,
+                isRefreshing = false,
+                errorMessage = sharedState.errorMessage
+            )
+        }
+
+        // If error and no data, return error state
+        if (sharedState.errorMessage != null && weather == null) {
+            return HomeUiState(
+                isLoading = false,
+                isRefreshing = false,
+                errorMessage = sharedState.errorMessage
+            )
+        }
+
+        // Transform weather data into Home UI format
+        val current = weather?.current
+        val daily = weather?.daily
+        val hourly = weather?.hourly
+
+        // AQI fallback logic (CURRENT → HOURLY)
+        val aqi = airQuality?.current?.europeanAqi
+            ?: airQuality?.hourly?.europeanAqi?.firstOrNull()
+
+        // UV peak (HOURLY UV INDEX)
+        val uvUi = buildUvUi(hourly, daily?.uvIndexMax?.firstOrNull())
+
+        // Generate weather mood
+        val mood = MoodGenerator.generateMood(weather, aqi)
+
+        return HomeUiState(
+            isLoading = false,
+            isRefreshing = sharedState.isRefreshing,
+            errorMessage = sharedState.errorMessage,
+
+            weather = weather,
+            airQuality = airQuality,
+            minutelyForecast = minutely,
+            locationName = sharedState.locationName,
+            latitude = sharedState.latitude,
+            longitude = sharedState.longitude,
+
+            // Hero
+            heroImageUrl = WeatherImageMapper.getImageUrl(
+                current?.weatherCode,
+                current?.isDay
+            ),
+            currentTemp = current?.temperature?.toInt()?.toString() ?: "--",
+            currentCondition = WeatherImageMapper.getConditionText(current?.weatherCode),
+            highLowTemp = WeatherUtils.formatHighLow(
+                daily?.tempMax?.firstOrNull(),
+                daily?.tempMin?.firstOrNull()
+            ),
+
+            // Sun
+            sunriseTime = WeatherUtils.formatTime(daily?.sunrise?.firstOrNull()),
+            sunsetTime = WeatherUtils.formatTime(daily?.sunset?.firstOrNull()),
+
+            // Rain
+            rainMessage = calculateRainMessage(current, minutely, hourly),
+            showRainCard = shouldShowRainCard(current, minutely, hourly),
+
+            // Metrics
+            humidity = WeatherUtils.formatHumidity(current?.humidity),
+            windSpeed = WeatherUtils.formatWindSpeed(current?.windSpeed),
+            visibility = WeatherUtils.formatVisibility(current?.visibility),
+            pressure = WeatherUtils.formatPressure(current?.pressure),
+
+            // AQI
+            aqiValue = aqi?.toString() ?: "--",
+            aqiCategory = WeatherUtils.formatAqiCategory(aqi),
+            aqiColor = WeatherUtils.getAqiColorHex(aqi),
+
+            // UV card
+            showUvCard = uvUi.show,
+            uvTitle = uvUi.title,
+            uvSub = uvUi.sub,
+
+            // Mood
+            showMoodCard = mood != null,
+            moodEmoji = mood?.emoji,
+            moodTitle = mood?.title,
+            moodDescription = mood?.description,
+            moodIconRes = R.drawable.ic_smile,
+
+            // Hourly forecast
+            hourlyForecast = buildHourlyForecast(hourly, current?.isDay),
+
+            lastUpdateTime = sharedState.lastUpdateTime
+        )
     }
 
     private fun calculateRainMessage(
@@ -295,7 +226,7 @@ class HomeViewModel @Inject constructor(
 
         val level = WeatherUtils.uvLevel(peakUv)
         val advice = WeatherUtils.uvAdvice(peakUv)
-        val sub = "UV $uvInt  $level\n$advice"
+        val sub = "UV $uvInt · $level\n$advice"
 
         return UvUi(show = true, title = title, sub = sub)
     }
@@ -324,9 +255,5 @@ class HomeViewModel @Inject constructor(
         }
 
         return if (bestTime != null && bestUv.isFinite()) PeakUv(bestTime, bestUv) else null
-    }
-
-    companion object {
-        private const val KEY_HAS_FETCHED = "has_fetched_initially"
     }
 }

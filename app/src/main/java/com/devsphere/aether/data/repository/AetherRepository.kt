@@ -25,10 +25,15 @@ class AetherRepository @Inject constructor(
 ) {
 
     /**
-     * Get weather with TTL-based caching
-     * Repository is the single source of truth - ViewModels should not decide when to fetch
+     * Get weather with cache-first strategy for instant display
+     *
+     * Strategy: "Stale-While-Revalidate"
+     * 1. Return cached data immediately (even if stale)
+     * 2. Fetch fresh data in background
+     * 3. Update UI when fresh data arrives
      *
      * @param forceRefresh Bypass cache and force network fetch (for pull-to-refresh)
+     * @param returnStaleCache If true, return stale cache immediately for instant display
      */
     suspend fun getWeather(
         latitude: Double,
@@ -37,22 +42,29 @@ class AetherRepository @Inject constructor(
         temperatureUnit: String = "celsius",
         windspeedUnit: String = "kmh",
         forecastDays: Int = 7,
-        forceRefresh: Boolean = false
+        forceRefresh: Boolean = false,
+        returnStaleCache: Boolean = true
     ): ApiResult<WeatherResponse> {
+
         // Check cache first (unless forced refresh)
-        if (!forceRefresh) {
+        if (!forceRefresh && returnStaleCache) {
             val cached = weatherStore.getWeather(latitude, longitude)
             if (cached != null) {
                 // Check if cache is still valid based on TTL
                 val shouldRefresh = CachePolicy.shouldRefreshForecast(cached.timestamp)
+
                 if (!shouldRefresh) {
-                    // Cache is valid, return cached data
+                    // Cache is fresh - return immediately
+                    return ApiResult.Success(cached.data)
+                } else {
+                    // Cache is stale but return it anyway for instant display
+                    // Fresh data will be fetched after this returns
                     return ApiResult.Success(cached.data)
                 }
             }
         }
 
-        // Cache miss or stale - fetch from network
+        // Cache miss or force refresh - fetch from network
         val result = ApiHandler.execute {
             weatherApi.getWeather(
                 latitude = latitude,

@@ -1,6 +1,5 @@
 package com.devsphere.aether.cache
 
-
 import com.devsphere.aether.data.local.dao.WeatherCacheDao
 import com.devsphere.aether.data.local.entity.WeatherCacheEntity
 import com.devsphere.aether.data.remote.dto.air.AirQualityResponse
@@ -50,6 +49,31 @@ class WeatherStore @Inject constructor(
     }
 
     // ==================== Weather Cache ====================
+
+    /**
+     * Load cached data from database into memory on initialization
+     * This populates in-memory cache from persistent storage for instant access
+     */
+    suspend fun loadCacheFromDatabase(latitude: Double, longitude: Double) {
+        val key = getCacheKey(latitude, longitude)
+
+        withContext(Dispatchers.IO) {
+            weatherCacheDao.getWeatherCache(key)?.let { entity ->
+                try {
+                    val weatherData = gson.fromJson(entity.weatherDataJson, WeatherResponse::class.java)
+                    val entry = WeatherCacheEntry(
+                        data = weatherData,
+                        timestamp = entity.timestamp
+                    )
+                    // Populate memory cache for instant access
+                    weatherCache[key] = entry
+                } catch (e: Exception) {
+                    // Invalid JSON, delete from DB
+                    weatherCacheDao.deleteWeatherCache(key)
+                }
+            }
+        }
+    }
 
     /**
      * Get cached weather data (checks memory first, then database)

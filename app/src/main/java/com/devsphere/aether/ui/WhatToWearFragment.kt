@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -21,28 +20,45 @@ import com.devsphere.aether.adapter.ActivitiesAdapter
 import com.devsphere.aether.adapter.RecommendedItemsAdapter
 import com.devsphere.aether.adapter.TipsAdapter
 import com.devsphere.aether.models.WearCategory
-import com.devsphere.aether.viewmodels.HomeViewModel
+import com.devsphere.aether.viewmodels.SharedWeatherViewModel
 import com.devsphere.aether.viewmodels.WhatToWearUiState
 import com.devsphere.aether.viewmodels.WhatToWearViewModel
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
+/**
+ * WhatToWearFragment - Observes SharedWeatherViewModel and generates suggestions via WhatToWearViewModel
+ */
 @AndroidEntryPoint
 class WhatToWearFragment : Fragment() {
 
+    // Activity-scoped SharedWeatherViewModel
+    private val sharedWeatherViewModel: SharedWeatherViewModel by activityViewModels()
+
+    // Fragment-scoped WhatToWearViewModel
     private val whatToWearViewModel: WhatToWearViewModel by viewModels()
-    private val homeViewModel: HomeViewModel by activityViewModels()
 
     private lateinit var recommendedAdapter: RecommendedItemsAdapter
     private lateinit var tipsAdapter: TipsAdapter
     private lateinit var activitiesAdapter: ActivitiesAdapter
 
     private var currentCategory = WearCategory.CASUAL
-
-    // Cache the latest state to avoid re-collecting on tab changes
     private var cachedUiState: WhatToWearUiState? = null
+
+    // Views
+    private lateinit var progressBar: View
+    private lateinit var txtCurrentTemp: TextView
+    private lateinit var txtCurrentCondition: TextView
+    private lateinit var icCurrentWeather: ImageView
+    private lateinit var recyclerRecommendedItems: RecyclerView
+    private lateinit var recyclerTips: RecyclerView
+    private lateinit var recyclerActivities: RecyclerView
+    private lateinit var cardSmartInsight: View
+    private lateinit var txtSmartInsightTitle: TextView
+    private lateinit var txtSmartInsightBody: TextView
+    private lateinit var icSmartInsight: ImageView
+    private lateinit var tabStyle: TabLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,66 +71,58 @@ class WhatToWearFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupViews(view)
-        setupRecyclerViews(view)
-        setupTabLayout(view)
-
-        // Observe both ViewModels with proper lifecycle scope
-        observeViewModels(view)
-
-        // Load data once using location from HomeViewModel
-        loadWeatherDataOnce()
+        bindViews(view)
+        setupRecyclerViews()
+        setupTabLayout()
+        observeViewModels()
     }
 
-    private fun setupViews(view: View) {
-        // Views are already set up in XML
+    private fun bindViews(view: View) {
+        progressBar = view.findViewById(R.id.progressBar)
+        txtCurrentTemp = view.findViewById(R.id.txtCurrentTemp)
+        txtCurrentCondition = view.findViewById(R.id.txtCurrentCondition)
+        icCurrentWeather = view.findViewById(R.id.icCurrentWeather)
+        recyclerRecommendedItems = view.findViewById(R.id.recyclerRecommendedItems)
+        recyclerTips = view.findViewById(R.id.recyclerTips)
+        recyclerActivities = view.findViewById(R.id.recyclerActivities)
+        cardSmartInsight = view.findViewById(R.id.cardSmartInsight)
+        txtSmartInsightTitle = view.findViewById(R.id.txtSmartInsightTitle)
+        txtSmartInsightBody = view.findViewById(R.id.txtSmartInsightBody)
+        icSmartInsight = view.findViewById(R.id.icSmartInsight)
+        tabStyle = view.findViewById(R.id.tabStyle)
     }
 
-    private fun setupRecyclerViews(view: View) {
-        // Recommended Items RecyclerView
+    private fun setupRecyclerViews() {
         recommendedAdapter = RecommendedItemsAdapter()
-        view.findViewById<RecyclerView>(R.id.recyclerRecommendedItems).apply {
+        recyclerRecommendedItems.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = recommendedAdapter
         }
 
-        // Tips RecyclerView
         tipsAdapter = TipsAdapter()
-        view.findViewById<RecyclerView>(R.id.recyclerTips).apply {
+        recyclerTips.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = tipsAdapter
         }
 
-        // Activities RecyclerView (2-column grid)
         activitiesAdapter = ActivitiesAdapter()
-        view.findViewById<RecyclerView>(R.id.recyclerActivities).apply {
+        recyclerActivities.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = activitiesAdapter
         }
     }
 
-    private fun setupTabLayout(view: View) {
-        val tabLayout = view.findViewById<TabLayout>(R.id.tabStyle)
+    private fun setupTabLayout() {
+        tabStyle.selectTab(tabStyle.getTabAt(0))
 
-        // Set default selection to Casual (first tab)
-        tabLayout.selectTab(tabLayout.getTabAt(0))
-
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        tabStyle.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
-                    0 -> { // Casual
-                        currentCategory = WearCategory.CASUAL
-                        updateRecommendedItemsFromCache()
-                    }
-                    1 -> { // Formal
-                        currentCategory = WearCategory.FORMAL
-                        updateRecommendedItemsFromCache()
-                    }
-                    2 -> { // Sport
-                        currentCategory = WearCategory.SPORTS
-                        updateRecommendedItemsFromCache()
-                    }
+                    0 -> currentCategory = WearCategory.CASUAL
+                    1 -> currentCategory = WearCategory.FORMAL
+                    2 -> currentCategory = WearCategory.SPORTS
                 }
+                updateRecommendedItemsFromCache()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
@@ -122,57 +130,54 @@ class WhatToWearFragment : Fragment() {
         })
     }
 
-    private fun observeViewModels(view: View) {
-        // Use repeatOnLifecycle to properly handle lifecycle
+    /**
+     * Observe both ViewModels:
+     * 1. SharedWeatherViewModel - triggers suggestion generation
+     * 2. WhatToWearViewModel - displays suggestions
+     */
+    private fun observeViewModels() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Collect WhatToWear state
                 launch {
+                    // Observe shared weather and trigger suggestion generation
+                    sharedWeatherViewModel.weatherState.collect { sharedState ->
+                        whatToWearViewModel.generateSuggestionsFromSharedState(sharedState)
+                    }
+                }
+
+                launch {
+                    // Observe and display suggestions
                     whatToWearViewModel.uiState.collect { state ->
-                        // Cache the state for tab switching
                         cachedUiState = state
 
-                        // Show/hide loading
-                        view.findViewById<View>(R.id.progressBar).visibility =
+                        progressBar.visibility =
                             if (state.isLoading) View.VISIBLE else View.GONE
 
                         if (state.error != null) {
-                            // TODO: Show error message
+                            // TODO: Show error
                             return@collect
                         }
 
-                        // Update temperature card
-                        view.findViewById<TextView>(R.id.txtCurrentTemp).text = state.currentTemp
-                        view.findViewById<TextView>(R.id.txtCurrentCondition).text = state.currentCondition
+                        txtCurrentTemp.text = state.currentTemp
+                        txtCurrentCondition.text = state.currentCondition
 
-                        // Update weather icon
                         state.weatherIconRes?.let { iconRes ->
-                            view.findViewById<ImageView>(R.id.icCurrentWeather).setImageResource(iconRes)
+                            icCurrentWeather.setImageResource(iconRes)
                         }
 
-                        // Update recommended items based on selected category
                         updateRecommendedItemsFromCache()
-
-                        // Update tips
                         tipsAdapter.submitList(state.tips)
-
-                        // Update activities
                         activitiesAdapter.submitList(state.activities)
 
-                        // Update smart insight
                         if (state.smartInsightTitle != null && state.smartInsightMessage != null) {
-                            view.findViewById<TextView>(R.id.txtSmartInsightTitle).text =
-                                state.smartInsightTitle
-                            view.findViewById<TextView>(R.id.txtSmartInsightBody).text =
-                                state.smartInsightMessage
-
+                            txtSmartInsightTitle.text = state.smartInsightTitle
+                            txtSmartInsightBody.text = state.smartInsightMessage
                             state.smartInsightIconRes?.let { iconRes ->
-                                view.findViewById<ImageView>(R.id.icSmartInsight).setImageResource(iconRes)
+                                icSmartInsight.setImageResource(iconRes)
                             }
-                            view.findViewById<View>(R.id.cardSmartInsight).visibility = View.VISIBLE
+                            cardSmartInsight.visibility = View.VISIBLE
                         } else {
-                            // Hide smart insight card if no insight
-                            view.findViewById<View>(R.id.cardSmartInsight).visibility = View.GONE
+                            cardSmartInsight.visibility = View.GONE
                         }
                     }
                 }
@@ -180,9 +185,6 @@ class WhatToWearFragment : Fragment() {
         }
     }
 
-    /**
-     * Update recommended items from cached state without starting new collector
-     */
     private fun updateRecommendedItemsFromCache() {
         cachedUiState?.let { state ->
             val items = when (currentCategory) {
@@ -191,29 +193,6 @@ class WhatToWearFragment : Fragment() {
                 WearCategory.SPORTS -> state.sportsItems
             }
             recommendedAdapter.submitList(items)
-        }
-    }
-
-    /**
-     * Load weather data once when fragment starts
-     */
-    // FIXED CODE:
-    private fun loadWeatherDataOnce() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Use firstOrNull() to get a single emission
-                val homeState = homeViewModel.uiState.firstOrNull()
-                val lat = homeState?.latitude
-                val lon = homeState?.longitude
-
-                // Load suggestions if we have valid coordinates
-                if (lat != null && lon != null) {
-                    whatToWearViewModel.loadSuggestionsForLocation(lat, lon)
-                } else {
-                    // Handle case where location is unavailable
-                    whatToWearViewModel.loadSuggestionsForLocation(0.0, 0.0)
-                }
-            }
         }
     }
 }

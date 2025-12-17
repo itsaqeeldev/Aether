@@ -104,4 +104,6 @@ dependencies {
     implementation("com.github.Dimezis:BlurView:version-3.2.0")
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 }

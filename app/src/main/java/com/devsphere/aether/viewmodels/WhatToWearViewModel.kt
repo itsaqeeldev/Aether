@@ -38,17 +38,8 @@ data class WhatToWearUiState(
 )
 
 /**
- * Clean WhatToWearViewModel following proper architecture
- *
- * ✅ ViewModel → Repository → DAO/API (correct!)
- * ❌ ViewModel → DAO directly (wrong - was doing this before)
- *
- * Responsibilities:
- * - Hold UI state
- * - Handle user actions
- * - Coordinate with repository
- * - NO direct database access
- * - NO business logic (that's in repository)
+ * WhatToWearViewModel - Uses SharedWeatherViewModel for weather data
+ * Fragment will observe both ViewModels and coordinate updates
  */
 @HiltViewModel
 class WhatToWearViewModel @Inject constructor(
@@ -59,65 +50,73 @@ class WhatToWearViewModel @Inject constructor(
     val uiState: StateFlow<WhatToWearUiState> = _uiState.asStateFlow()
 
     /**
-     * Load suggestions for a location
-     * Delegates all logic to repository
+     * Generate suggestions when weather data becomes available
+     * Called from Fragment when SharedWeatherState changes
      */
-    fun loadSuggestionsForLocation(lat: Double, lon: Double, forceRefresh: Boolean = false) {
+    fun generateSuggestionsFromSharedState(sharedState: SharedWeatherState) {
         viewModelScope.launch {
-            try {
-                // Show loading only if we don't have data yet
+            // Only generate suggestions when we have valid weather data
+            if (sharedState.weather != null &&
+                sharedState.latitude != null &&
+                sharedState.longitude != null) {
+
+                // Show loading only initially
                 if (_uiState.value.currentTemp == "--") {
-                    _uiState.update { it.copy(isLoading = true, error = null) }
+                    _uiState.update { it.copy(isLoading = true) }
                 }
 
-                // Get suggestions from repository
-                // Repository handles:
-                // - Cache checking
-                // - Weather fetching
-                // - Suggestion generation
-                // - Cache saving
-                val suggestions = whatToWearRepository.getSuggestions(
-                    latitude = lat,
-                    longitude = lon,
-                    forceRefresh = forceRefresh
-                )
-
-                // Map to UI state
-                _uiState.update {
-                    WhatToWearUiState(
-                        currentTemp = suggestions.currentTemp,
-                        currentCondition = suggestions.currentCondition,
-                        weatherIconRes = mapIconCodeToResource(suggestions.weatherIconCode),
-                        formalItems = suggestions.formalItems,
-                        casualItems = suggestions.casualItems,
-                        sportsItems = suggestions.sportsItems,
-                        tips = suggestions.tips,
-                        activities = suggestions.activities,
-                        smartInsightTitle = suggestions.smartInsightTitle,
-                        smartInsightMessage = suggestions.smartInsightMessage,
-                        smartInsightIconRes = getInsightIconRes(suggestions.smartInsightTitle),
-                        isLoading = false,
-                        error = null,
-                        lastUpdated = suggestions.timestamp
-                    )
-                }
-
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Failed to load suggestions: ${e.message}"
-                    )
-                }
+                generateSuggestions(sharedState.latitude, sharedState.longitude)
+            } else if (sharedState.isLoading) {
+                // Weather is still loading
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            } else if (sharedState.errorMessage != null) {
+                // Weather fetch failed
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    error = sharedState.errorMessage
+                )}
             }
         }
     }
 
     /**
-     * Refresh suggestions (bypasses cache)
+     * Generate suggestions using coordinates
      */
-    fun refresh(lat: Double, lon: Double) {
-        loadSuggestionsForLocation(lat, lon, forceRefresh = true)
+    private suspend fun generateSuggestions(lat: Double, lon: Double) {
+        try {
+            val suggestions = whatToWearRepository.getSuggestions(
+                latitude = lat,
+                longitude = lon,
+                forceRefresh = false
+            )
+
+            _uiState.update {
+                WhatToWearUiState(
+                    currentTemp = suggestions.currentTemp,
+                    currentCondition = suggestions.currentCondition,
+                    weatherIconRes = mapIconCodeToResource(suggestions.weatherIconCode),
+                    formalItems = suggestions.formalItems,
+                    casualItems = suggestions.casualItems,
+                    sportsItems = suggestions.sportsItems,
+                    tips = suggestions.tips,
+                    activities = suggestions.activities,
+                    smartInsightTitle = suggestions.smartInsightTitle,
+                    smartInsightMessage = suggestions.smartInsightMessage,
+                    smartInsightIconRes = getInsightIconRes(suggestions.smartInsightTitle),
+                    isLoading = false,
+                    error = null,
+                    lastUpdated = suggestions.timestamp
+                )
+            }
+
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    error = "Failed to load suggestions: ${e.message}"
+                )
+            }
+        }
     }
 
     /**
@@ -127,11 +126,6 @@ class WhatToWearViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 
-    // ==================== UI Mapping Helpers ====================
-
-    /**
-     * Map weather icon code to drawable resource
-     */
     private fun mapIconCodeToResource(iconCode: Int): Int {
         return when (iconCode) {
             1 -> com.devsphere.aether.R.drawable.ic_sun
@@ -143,9 +137,6 @@ class WhatToWearViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Get icon for smart insight
-     */
     private fun getInsightIconRes(title: String?): Int? {
         return when {
             title?.contains("warning", ignoreCase = true) == true ->
